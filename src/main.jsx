@@ -158,7 +158,6 @@ function reconcileChildren(wipFiber, elements) {
   let oldFiber = wipFiber.alternate && wipFiber.alternate.child;
   let prevSibling = null
 
-
   // 子要素ごとに新しいファイバーを作成
   while (index < elements.length || oldFiber != null) {
     const element = elements[index]
@@ -200,8 +199,6 @@ function reconcileChildren(wipFiber, elements) {
     if (oldFiber) {
       oldFiber = oldFiber.sibling
     }
-
-
 
     // 最初の子要素の場合は 親要素の child に設定
     if (index === 0) {
@@ -273,13 +270,3 @@ const rerender = value => {
 }
 
 rerender("World")
-
-// const element = (
-//   <div style="background: salmon">
-//     <h1>Hello World</h1>
-//     <h2 style="text-align:right">from Didact</h2>
-//   </div>
-// );
-
-// const container = document.getElementById("root");
-// Didact.render(element, container);
