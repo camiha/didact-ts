@@ -1,4 +1,4 @@
-import Didact from "./didact";
+import { render, createElement, useState, useEffect } from "./didact";
 
 type FetchData = {
 	isLoaded: boolean;
@@ -20,15 +20,15 @@ const initialData = {
 	},
 };
 
-/** @jsx Didact.createElement */
+/** @jsx createElement */
 function App() {
-	const [count, setCount] = Didact.useState(1);
-	const [data, setData] = Didact.useState<FetchData>(initialData);
+	const [count, setCount] = useState(1);
+	const [data, setData] = useState<FetchData>(initialData);
 
 	const handleCountUp = () => setCount((prev) => prev + 1);
 	const handleCountDown = () => setCount((prev) => prev - 1);
 
-	Didact.useEffect(async () => {
+	useEffect(async () => {
 		const response = await fetch(
 			"https://jsonplaceholder.typicode.com/todos/1",
 		);
@@ -64,4 +64,4 @@ function App() {
 // @ts-expect-error
 const element = <App />;
 const container = document.getElementById("root") as HTMLElement;
-Didact.render(element, container);
+render(element, container);

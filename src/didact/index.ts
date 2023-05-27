@@ -268,4 +268,4 @@ function render(element: any, container: DomNode) {
 	appState.nextUnitOfWork = appState.wipRoot;
 }
 
-export default { createElement, render, useState, useEffect };
+export { createElement, render, useState, useEffect };
