@@ -1,6 +1,7 @@
 import { appState } from "./state";
 import { useState } from "./hooks/useState";
 import type { RequestIdleCallbackDeadline, DomNode, Fiber } from "./types";
+import { useEffect } from "./hooks/useEffect";
 
 function createElement(type: string, props: any, ...children: any[]) {
 	return {
@@ -267,4 +268,4 @@ function render(element: any, container: DomNode) {
 	appState.nextUnitOfWork = appState.wipRoot;
 }
 
-export default { createElement, render, useState };
+export default { createElement, render, useState, useEffect };
