@@ -9,7 +9,6 @@ I started this project because I am interested in how react works.
 import Didact from "./didact";
 import { useState, useEffect } from "./didact";
 
-/** @jsx Didact.createElement */
 function App() {
   const [count, setCount] = useState(1);
   const handleCountUp = () => setCount((prev) => prev + 1);
@@ -38,7 +37,6 @@ Didact.render(element, container);
 import Didact from "./didact";
 import { useState, useEffect } from "./didact";
 
-/** @jsx Didact.createElement */
 function App() {
   const [data, setData] = useState<FetchData>(initialData);
 

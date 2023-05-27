@@ -21,7 +21,6 @@ const initialData = {
 	},
 };
 
-/** @jsx Didact.createElement */
 function App() {
 	const [count, setCount] = useState(1);
 	const [data, setData] = useState<FetchData>(initialData);
