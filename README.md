@@ -18,8 +18,12 @@ function App() {
   return (
     <div>
       <p>Count: {count}</p>
-      <button onClick={handleCountUp}>count up</button>
-      <button onClick={handleCountDown}>count down</button>
+      <button type="button" onClick={handleCountUp}>
+        count up
+      </button>
+      <button type="button" onClick={handleCountDown}>
+        count down
+      </button>
     </div>
   );
 }
