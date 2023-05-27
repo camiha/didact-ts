@@ -1,7 +1,7 @@
 import type { RequestIdleCallbackDeadline, DomNode, Fiber } from "./types";
 import { appState } from "./state";
-import { useState } from "./hooks/useState";
-import { useEffect } from "./hooks/useEffect";
+import { useState } from "../hooks/useState";
+import { useEffect } from "../hooks/useEffect";
 
 const isEvent = (key: any) => key.startsWith("on");
 const isProperty = (key: any) => key !== "children";
