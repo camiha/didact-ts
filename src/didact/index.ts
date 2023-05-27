@@ -1,9 +1,30 @@
 //@ts-nocheck
 
-let nextUnitOfWork = null;
-let currentRoot = null;
-let wipRoot = null;
-let deletions = null;
+type Fiber = {
+	type: string | Function;
+	props: {
+		children: Fiber[];
+		[key: string]: any;
+	};
+	dom?: HTMLElement | Text | null;
+	parent?: Fiber | null;
+	sibling?: Fiber | null;
+	child?: Fiber | null;
+	alternate?: Fiber | null;
+	effectTag?: string;
+	hooks?: any[];
+};
+
+type AppState = {
+	currentRoot: Fiber;
+	deletions: Fiber[];
+	wipFiber: Fiber;
+	nextUnitOfWork?: Fiber;
+	wipRoot?: Fiber;
+	hookIndex: number;
+};
+
+const appState = {} as AppState;
 
 function createElement(type, props, ...children) {
 	return {
@@ -70,9 +91,9 @@ function updateDom(dom, prevProps, nextProps) {
 
 function commitRoot() {
 	// TODO add nodes to dom
-	commitWork(wipRoot.child);
-	currentRoot = wipRoot;
-	wipRoot = null;
+	commitWork(appState.wipRoot.child);
+	appState.currentRoot = appState.wipRoot;
+	appState.wipRoot = null;
 }
 
 // 全てのノードをDOMに追加・再帰的に処理を行う
@@ -111,13 +132,13 @@ function commitDeletion(fiber, domParent) {
 
 function workLoop(deadline) {
 	let shouldYield = false;
-	while (nextUnitOfWork && !shouldYield) {
-		nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
+	while (appState.nextUnitOfWork && !shouldYield) {
+		appState.nextUnitOfWork = performUnitOfWork(appState.nextUnitOfWork);
 		shouldYield = deadline.timeRemaining() < 1;
 	}
 
 	// 全ての作業が終了したら、ファイバーツリー全体を DOM にコミット
-	if (!nextUnitOfWork && wipRoot) {
+	if (!appState.nextUnitOfWork && appState.wipRoot) {
 		commitRoot();
 	}
 
@@ -157,22 +178,19 @@ function performUnitOfWork(fiber) {
 	}
 }
 
-let wipFiber = null;
-let hookIndex = null;
-
 function updateFunctionComponent(fiber) {
-	wipFiber = fiber;
-	hookIndex = 0;
-	wipFiber.hooks = [];
+	appState.wipFiber = fiber;
+	appState.hookIndex = 0;
+	appState.wipFiber.hooks = [];
 	const children = [fiber.type(fiber.props)];
 	reconcileChildren(fiber, children);
 }
 
 function useState(initial) {
 	const oldHook =
-		wipFiber.alternate &&
-		wipFiber.alternate.hooks &&
-		wipFiber.alternate.hooks[hookIndex];
+		appState.wipFiber.alternate &&
+		appState.wipFiber.alternate.hooks &&
+		appState.wipFiber.alternate.hooks[appState.hookIndex];
 	const hook = {
 		state: oldHook ? oldHook.state : initial,
 		queue: [],
@@ -185,17 +203,17 @@ function useState(initial) {
 
 	const setState = (action) => {
 		hook.queue.push(action);
-		wipRoot = {
-			dom: currentRoot.dom,
-			props: currentRoot.props,
-			alternate: currentRoot,
+		appState.wipRoot = {
+			dom: appState.currentRoot.dom,
+			props: appState.currentRoot.props,
+			alternate: appState.currentRoot,
 		};
-		nextUnitOfWork = wipRoot;
-		deletions = [];
+		appState.nextUnitOfWork = appState.wipRoot;
+		appState.deletions = [];
 	};
 
-	wipFiber.hooks.push(hook);
-	hookIndex++;
+	appState.wipFiber.hooks.push(hook);
+	appState.hookIndex++;
 	return [hook.state, setState];
 }
 
@@ -248,7 +266,7 @@ function reconcileChildren(wipFiber, elements) {
 		// タイプが異なり、古いファイバーがある場合は、古いノードを削除
 		if (oldFiber && !sameType) {
 			oldFiber.effectTag = "DELETION";
-			deletions.push(oldFiber);
+			appState.deletions.push(oldFiber);
 		}
 
 		if (oldFiber) {
@@ -283,18 +301,18 @@ function createDom(fiber) {
 function render(element, container) {
 	// progress root とも
 	// ファイバーツリー のルートを追跡
-	wipRoot = {
+	appState.wipRoot = {
 		dom: container,
 		props: {
 			children: [element],
 		},
-		alternate: currentRoot,
+		alternate: appState.currentRoot,
 	};
-	deletions = [];
+	appState.deletions = [];
 
-	// ここで nextUnitOfWork が null でなくなることで、
+	// ここで appState.nextUnitOfWork が null でなくなることで、
 	// workLoop が実行されるようになる
-	nextUnitOfWork = wipRoot;
+	appState.nextUnitOfWork = appState.wipRoot;
 }
 
 export default { createElement, render, useState };
