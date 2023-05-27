@@ -1,11 +1,6 @@
-import type {
-	RequestIdleCallbackDeadline,
-	DomNode,
-	Fiber,
-	AppState,
-} from "./types";
-
-const appState = {} as AppState;
+import { appState } from "./state";
+import { useState } from "./hooks/useState";
+import type { RequestIdleCallbackDeadline, DomNode, Fiber } from "./types";
 
 function createElement(type: string, props: any, ...children: any[]) {
 	return {
@@ -173,36 +168,6 @@ function updateFunctionComponent(fiber: Fiber) {
 	appState.wipFiber.hooks = [];
 	const children = [(fiber.type as Function)(fiber.props)];
 	reconcileChildren(fiber, children);
-}
-
-function useState<T>(initial: T): [T, (action: (prevState: T) => T) => void] {
-	const oldHook = appState.wipFiber.alternate?.hooks?.[appState.hookIndex];
-	const hook = {
-		state: oldHook ? oldHook.state : initial,
-		queue: [] as any[],
-	};
-
-	const actions = oldHook ? oldHook.queue : [];
-	actions.forEach((action: any) => {
-		hook.state = action(hook.state);
-	});
-
-	const setState = (action: any) => {
-		hook.queue.push(action);
-		appState.wipRoot = {
-			dom: appState.currentRoot.dom,
-			props: appState.currentRoot.props,
-			alternate: appState.currentRoot,
-		};
-		appState.nextUnitOfWork = appState.wipRoot;
-		appState.deletions = [];
-	};
-
-	if (appState.wipFiber.hooks) {
-		appState.wipFiber.hooks.push(hook);
-		appState.hookIndex++;
-	}
-	return [hook.state, setState];
 }
 
 function updateHostComponent(fiber: Fiber) {
