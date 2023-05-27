@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 let nextUnitOfWork = null;
 let currentRoot = null;
 let wipRoot = null;
