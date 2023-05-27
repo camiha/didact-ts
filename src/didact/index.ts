@@ -1,12 +1,16 @@
-//@ts-nocheck
+type RequestIdleCallbackDeadline = {
+	readonly didTimeout: boolean;
+	timeRemaining: () => number;
+};
 
+type DomNode = HTMLElement | Text;
 type Fiber = {
-	type: string | Function;
+	type?: string | Function;
 	props: {
 		children: Fiber[];
 		[key: string]: any;
 	};
-	dom?: HTMLElement | Text | null;
+	dom?: DomNode | null;
 	parent?: Fiber | null;
 	sibling?: Fiber | null;
 	child?: Fiber | null;
@@ -20,13 +24,13 @@ type AppState = {
 	deletions: Fiber[];
 	wipFiber: Fiber;
 	nextUnitOfWork?: Fiber;
-	wipRoot?: Fiber;
+	wipRoot?: Fiber | null;
 	hookIndex: number;
 };
 
 const appState = {} as AppState;
 
-function createElement(type, props, ...children) {
+function createElement(type: string, props: any, ...children: any[]) {
 	return {
 		type,
 		props: {
@@ -38,7 +42,7 @@ function createElement(type, props, ...children) {
 	};
 }
 
-function createTextElement(text) {
+function createTextElement(text: string) {
 	return {
 		type: "TEXT_ELEMENT",
 		props: {
@@ -48,18 +52,18 @@ function createTextElement(text) {
 	};
 }
 
-const isEvent = (key) => key.startsWith("on");
-const isProperty = (key) => key !== "children";
-const isNew = (prev, next) => (key) => prev[key] !== next[key];
-const isGone = (prev, next) => (key) => !(key in next);
+const isEvent = (key: any) => key.startsWith("on");
+const isProperty = (key: any) => key !== "children";
+const isNew = (prev: any, next: any) => (key: any) => prev[key] !== next[key];
+const isGone = (prev: any, next: any) => (key: any) => !(key in next);
 
-function updateDom(dom, prevProps, nextProps) {
+function updateDom(dom: DomNode, prevProps: any, nextProps: any) {
 	// Remove old properties
 	Object.keys(prevProps)
 		.filter(isProperty)
 		.filter(isGone(prevProps, nextProps))
 		.forEach((name) => {
-			dom[name] = "";
+			(dom as any)[name] = "";
 		});
 
 	// Set new or changed properties
@@ -67,7 +71,7 @@ function updateDom(dom, prevProps, nextProps) {
 		.filter(isProperty)
 		.filter(isNew(prevProps, nextProps))
 		.forEach((name) => {
-			dom[name] = nextProps[name];
+			(dom as any)[name] = nextProps[name];
 		});
 
 	//　Remove old or changed event listeners
@@ -90,47 +94,55 @@ function updateDom(dom, prevProps, nextProps) {
 }
 
 function commitRoot() {
-	// TODO add nodes to dom
-	commitWork(appState.wipRoot.child);
-	appState.currentRoot = appState.wipRoot;
+	// appState.deletions.forEach(commitWork);
+
+	if (appState.wipRoot?.child) {
+		commitWork(appState.wipRoot.child);
+		appState.currentRoot = appState.wipRoot;
+	}
+
 	appState.wipRoot = null;
 }
 
 // 全てのノードをDOMに追加・再帰的に処理を行う
-function commitWork(fiber) {
+function commitWork(fiber?: Fiber) {
 	if (!fiber) {
 		return;
 	}
 
 	let domParentFiber = fiber.parent;
-	while (!domParentFiber.dom) {
-		domParentFiber = domParentFiber.parent;
+	while (!domParentFiber?.dom) {
+		domParentFiber = domParentFiber?.parent;
 	}
 	const domParent = domParentFiber.dom;
 
 	if (fiber.effectTag === "PLACEMENT" && fiber.dom != null) {
 		domParent.appendChild(fiber.dom);
-	} else if (fiber.effectTag === "UPDATE" && fiber.dom != null) {
+	} else if (
+		fiber.effectTag === "UPDATE" &&
+		fiber.dom != null &&
+		fiber.alternate
+	) {
 		updateDom(fiber.dom, fiber.alternate.props, fiber.props);
 	} else if (fiber.effectTag === "DELETION") {
 		// domParent.removeChild(fiber.dom)
 		commitDeletion(fiber, domParent);
 	}
 
-	commitWork(fiber.child);
-	commitWork(fiber.sibling);
+	commitWork(fiber.child as Fiber);
+	commitWork(fiber.sibling as Fiber);
 }
 
 // 関数コンポーネントの時は、 DOM ノードが存在しないため見つかるまで再帰的に移動
-function commitDeletion(fiber, domParent) {
+function commitDeletion(fiber: Fiber, domParent: DomNode) {
 	if (fiber.dom) {
 		domParent.removeChild(fiber.dom);
-	} else {
-		commitDeletion(fiber.child.domParent);
+	} else if (fiber?.child) {
+		commitDeletion(fiber.child, domParent);
 	}
 }
 
-function workLoop(deadline) {
+function workLoop(deadline: RequestIdleCallbackDeadline) {
 	let shouldYield = false;
 	while (appState.nextUnitOfWork && !shouldYield) {
 		appState.nextUnitOfWork = performUnitOfWork(appState.nextUnitOfWork);
@@ -149,7 +161,7 @@ requestIdleCallback(workLoop);
 
 // 親子・兄弟関係を元にしたノード間のマッピングを行い、
 // 優先度に応じた作業単位の返却を行う
-function performUnitOfWork(fiber) {
+function performUnitOfWork(fiber: Fiber) {
 	const isFunctionComponent = fiber.type instanceof Function;
 
 	if (isFunctionComponent) {
@@ -174,34 +186,31 @@ function performUnitOfWork(fiber) {
 			// 次の兄弟要素を返す
 			return nextFiber.sibling;
 		}
-		nextFiber = nextFiber.parent; // 親要素に戻る
+		nextFiber = nextFiber.parent as Fiber; // 親要素に戻る
 	}
 }
 
-function updateFunctionComponent(fiber) {
+function updateFunctionComponent(fiber: Fiber) {
 	appState.wipFiber = fiber;
 	appState.hookIndex = 0;
 	appState.wipFiber.hooks = [];
-	const children = [fiber.type(fiber.props)];
+	const children = [(fiber.type as Function)(fiber.props)];
 	reconcileChildren(fiber, children);
 }
 
-function useState(initial) {
-	const oldHook =
-		appState.wipFiber.alternate &&
-		appState.wipFiber.alternate.hooks &&
-		appState.wipFiber.alternate.hooks[appState.hookIndex];
+function useState<T>(initial: T): [T, (action: (prevState: T) => T) => void] {
+	const oldHook = appState.wipFiber.alternate?.hooks?.[appState.hookIndex];
 	const hook = {
 		state: oldHook ? oldHook.state : initial,
-		queue: [],
+		queue: [] as any[],
 	};
 
 	const actions = oldHook ? oldHook.queue : [];
-	actions.forEach((action) => {
+	actions.forEach((action: any) => {
 		hook.state = action(hook.state);
 	});
 
-	const setState = (action) => {
+	const setState = (action: any) => {
 		hook.queue.push(action);
 		appState.wipRoot = {
 			dom: appState.currentRoot.dom,
@@ -212,12 +221,14 @@ function useState(initial) {
 		appState.deletions = [];
 	};
 
-	appState.wipFiber.hooks.push(hook);
-	appState.hookIndex++;
+	if (appState.wipFiber.hooks) {
+		appState.wipFiber.hooks.push(hook);
+		appState.hookIndex++;
+	}
 	return [hook.state, setState];
 }
 
-function updateHostComponent(fiber) {
+function updateHostComponent(fiber: Fiber) {
 	if (!fiber.dom) {
 		fiber.dom = createDom(fiber);
 	}
@@ -225,18 +236,18 @@ function updateHostComponent(fiber) {
 	reconcileChildren(fiber, fiber.props.children);
 }
 
-function reconcileChildren(wipFiber, elements) {
+function reconcileChildren(wipFiber: Fiber, elements: any) {
 	let index = 0;
 	// 前回のレンダリング時のファイバーを取得
-	let oldFiber = wipFiber.alternate && wipFiber.alternate.child;
-	let prevSibling = null;
+	let oldFiber = wipFiber.alternate?.child;
+	let prevSibling: Fiber | null = null;
 
 	// 子要素ごとに新しいファイバーを作成
 	while (index < elements.length || oldFiber != null) {
 		const element = elements[index];
-		let newFiber = null;
+		let newFiber: Fiber | null = null;
 
-		const sameType = oldFiber && element && element.type == oldFiber.type;
+		const sameType = oldFiber && element && element.type === oldFiber.type;
 
 		// 既存のものに parent / dom を追加
 
@@ -244,9 +255,9 @@ function reconcileChildren(wipFiber, elements) {
 		// DOMノードを保持し、新しいpropsで更新
 		if (sameType) {
 			newFiber = {
-				type: oldFiber.type,
+				type: oldFiber?.type,
 				props: element.props,
-				dom: oldFiber.dom,
+				dom: oldFiber?.dom,
 				parent: wipFiber,
 				alternate: oldFiber,
 				effectTag: "UPDATE",
@@ -276,7 +287,7 @@ function reconcileChildren(wipFiber, elements) {
 		// 最初の子要素の場合は 親要素の child に設定
 		if (index === 0) {
 			wipFiber.child = newFiber;
-		} else {
+		} else if (elements && prevSibling) {
 			// 2つ目以降の子要素の場合は、前の要素の sibling（兄弟要素） に設定
 			prevSibling.sibling = newFiber;
 		}
@@ -287,18 +298,17 @@ function reconcileChildren(wipFiber, elements) {
 	}
 }
 
-function createDom(fiber) {
+function createDom(fiber: Fiber) {
 	const dom =
-		fiber.type == "TEXT_ELEMENT"
+		fiber.type === "TEXT_ELEMENT"
 			? document.createTextNode("")
-			: document.createElement(fiber.type);
+			: document.createElement(fiber.type as string);
 
 	updateDom(dom, {}, fiber.props);
-
 	return dom;
 }
 
-function render(element, container) {
+function render(element: any, container: DomNode) {
 	// progress root とも
 	// ファイバーツリー のルートを追跡
 	appState.wipRoot = {
