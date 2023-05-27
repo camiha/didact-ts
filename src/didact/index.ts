@@ -1,7 +1,12 @@
+import type { RequestIdleCallbackDeadline, DomNode, Fiber } from "./types";
 import { appState } from "./state";
 import { useState } from "./hooks/useState";
-import type { RequestIdleCallbackDeadline, DomNode, Fiber } from "./types";
 import { useEffect } from "./hooks/useEffect";
+
+const isEvent = (key: any) => key.startsWith("on");
+const isProperty = (key: any) => key !== "children";
+const isNew = (prev: any, next: any) => (key: any) => prev[key] !== next[key];
+const isGone = (next: any) => (key: any) => !(key in next);
 
 function createElement(type: string, props: any, ...children: any[]) {
 	return {
@@ -24,11 +29,6 @@ function createTextElement(text: string) {
 		},
 	};
 }
-
-const isEvent = (key: any) => key.startsWith("on");
-const isProperty = (key: any) => key !== "children";
-const isNew = (prev: any, next: any) => (key: any) => prev[key] !== next[key];
-const isGone = (next: any) => (key: any) => !(key in next);
 
 function updateDom(dom: DomNode, prevProps: any, nextProps: any) {
 	// Remove old properties
@@ -143,9 +143,6 @@ function performUnitOfWork(fiber: Fiber) {
 		updateHostComponent(fiber);
 	}
 
-	// const elements = fiber.props.children
-	// reconcileChildren(fiber, elements)
-
 	// 子要素 => 兄弟要素 => 叔父の順で要素を返す
 	if (fiber.child) {
 		return fiber.child;
@@ -191,8 +188,6 @@ function reconcileChildren(wipFiber: Fiber, elements: any) {
 		let newFiber: Fiber | undefined = undefined;
 
 		const sameType = oldFiber && element && element.type === oldFiber.type;
-
-		// 既存のものに parent / dom を追加
 
 		// 古いファイバーと新しい要素が同じタイプの場合
 		// DOMノードを保持し、新しいpropsで更新
