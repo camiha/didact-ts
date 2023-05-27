@@ -78,7 +78,7 @@ function commitRoot() {
 		appState.currentRoot = appState.wipRoot;
 	}
 
-	appState.wipRoot = null;
+	appState.wipRoot = undefined;
 }
 
 // 全てのノードをDOMに追加・再帰的に処理を行う
@@ -217,12 +217,12 @@ function reconcileChildren(wipFiber: Fiber, elements: any) {
 	let index = 0;
 	// 前回のレンダリング時のファイバーを取得
 	let oldFiber = wipFiber.alternate?.child;
-	let prevSibling: Fiber | null = null;
+	let prevSibling: Fiber | undefined = undefined;
 
 	// 子要素ごとに新しいファイバーを作成
-	while (index < elements.length || oldFiber != null) {
+	while (index < elements.length || oldFiber !== undefined) {
 		const element = elements[index];
-		let newFiber: Fiber | null = null;
+		let newFiber: Fiber | undefined = undefined;
 
 		const sameType = oldFiber && element && element.type === oldFiber.type;
 
@@ -245,9 +245,9 @@ function reconcileChildren(wipFiber: Fiber, elements: any) {
 			newFiber = {
 				type: element.type,
 				props: element.props,
-				dom: null,
+				dom: undefined,
 				parent: wipFiber,
-				alternate: null,
+				alternate: undefined,
 				effectTag: "PLACEMENT",
 			};
 		}

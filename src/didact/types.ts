@@ -10,11 +10,11 @@ export type Fiber = {
 		children: Fiber[];
 		[key: string]: any;
 	};
-	dom?: DomNode | null;
-	parent?: Fiber | null;
-	sibling?: Fiber | null;
-	child?: Fiber | null;
-	alternate?: Fiber | null;
+	dom?: DomNode;
+	parent?: Fiber;
+	sibling?: Fiber;
+	child?: Fiber;
+	alternate?: Fiber;
 	effectTag?: string;
 	hooks?: any[];
 };
@@ -24,6 +24,6 @@ export type AppState = {
 	deletions: Fiber[];
 	wipFiber: Fiber;
 	nextUnitOfWork?: Fiber;
-	wipRoot?: Fiber | null;
+	wipRoot?: Fiber;
 	hookIndex: number;
 };
