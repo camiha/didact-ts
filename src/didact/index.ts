@@ -1,2 +1,11 @@
-import { render, createElement, useState, useEffect } from "./core";
-export { render, createElement, useState, useEffect };
+import { render, createElement } from "./core";
+import { useState, useEffect } from "./hooks";
+
+export { useState, useEffect };
+
+const Didact = {
+	render,
+	createElement,
+};
+
+export default Didact;

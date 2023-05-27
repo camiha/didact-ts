@@ -1,4 +1,5 @@
-import { render, createElement, useState, useEffect } from "./didact";
+import Didact from "./didact";
+import { useState, useEffect } from "./didact";
 
 type FetchData = {
 	isLoaded: boolean;
@@ -20,7 +21,7 @@ const initialData = {
 	},
 };
 
-/** @jsx createElement */
+/** @jsx Didact.createElement */
 function App() {
 	const [count, setCount] = useState(1);
 	const [data, setData] = useState<FetchData>(initialData);
@@ -41,12 +42,15 @@ function App() {
 		});
 	}, []);
 
-	// TODO: jsx factory の調査・エラー対応
 	return (
 		<div>
 			<p>Count: {count}</p>
-			<button onClick={handleCountUp}>count up</button>
-			<button onClick={handleCountDown}>count down</button>
+			<button type="button" onClick={handleCountUp}>
+				count up
+			</button>
+			<button type="button" onClick={handleCountDown}>
+				count down
+			</button>
 			<hr />
 			{data.isLoaded ? (
 				<div>
@@ -61,7 +65,6 @@ function App() {
 	);
 }
 
-// @ts-expect-error
 const element = <App />;
 const container = document.getElementById("root") as HTMLElement;
-render(element, container);
+Didact.render(element, container);

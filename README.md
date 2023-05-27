@@ -6,9 +6,10 @@ I started this project because I am interested in how react works.
 ## Hooks
 ### useState
 ```tsx
-import { render, createElement, useState } from "./didact";
+import Didact from "./didact";
+import { useState, useEffect } from "./didact";
 
-/** @jsx createElement */
+/** @jsx Didact.createElement */
 function App() {
   const [count, setCount] = useState(1);
   const handleCountUp = () => setCount((prev) => prev + 1);
@@ -25,14 +26,15 @@ function App() {
 
 const element = <App />;
 const container = document.getElementById("root") as HTMLElement;
-render(element, container);
+Didact.render(element, container);
 ```
 
 ### useEffect
 ```tsx
-import { render, createElement, useState, useEffect } from "./didact";
+import Didact from "./didact";
+import { useState, useEffect } from "./didact";
 
-/** @jsx createElement */
+/** @jsx Didact.createElement */
 function App() {
   const [data, setData] = useState<FetchData>(initialData);
 
@@ -66,11 +68,10 @@ function App() {
 
 const element = <App />;
 const container = document.getElementById("root") as HTMLElement;
-render(element, container);
+Didact.render(element, container);
 ```
 
 ## TODO
-- [ ] fix TS17004 error(with create own jsx factory)
 - [ ] support style object
 - [ ] add memo hooks
 

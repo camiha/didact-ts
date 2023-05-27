@@ -1,4 +1,4 @@
-import { appState } from "../state";
+import { appState } from "../core/state";
 
 export function useState<T>(
 	initial: T,

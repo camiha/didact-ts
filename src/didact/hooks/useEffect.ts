@@ -1,5 +1,5 @@
 import { isEqual } from "lodash";
-import { appState } from "../state";
+import { appState } from "../core/state";
 export function useEffect(callback: () => void, deps: any[]) {
 	const oldHook = appState.wipFiber?.alternate?.hooks?.[appState.hookIndex];
 	const hook = {
