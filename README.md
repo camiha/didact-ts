@@ -3,6 +3,16 @@
 tiny React Clone in TypeScript.  
 I started this project because I am interested in how react works.  
 
+## Setup root
+```tsx
+import Didact from "./didact";
+import App from "./App.tsx";
+
+Didact.createRoot(document.getElementById("root") as HTMLElement).render(
+	<App />,
+);
+```
+
 ## Hooks
 ### useState
 ```tsx
@@ -26,10 +36,6 @@ function App() {
     </div>
   );
 }
-
-const element = <App />;
-const container = document.getElementById("root") as HTMLElement;
-Didact.render(element, container);
 ```
 
 ### useEffect
@@ -67,10 +73,6 @@ function App() {
     </div>
   );
 }
-
-const element = <App />;
-const container = document.getElementById("root") as HTMLElement;
-Didact.render(element, container);
 ```
 
 ## Styling

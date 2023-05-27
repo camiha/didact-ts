@@ -252,21 +252,29 @@ function createDom(fiber: Fiber) {
 	return dom;
 }
 
-function render(element: any, container: DomNode) {
-	// progress root とも
-	// ファイバーツリー のルートを追跡
-	appState.wipRoot = {
-		dom: container,
-		props: {
-			children: [element],
-		},
-		alternate: appState.currentRoot,
-	};
-	appState.deletions = [];
+function render(container: DomNode): (element: any) => void {
+	return (element: any) => {
+		// progress root とも
+		// ファイバーツリー のルートを追跡
+		appState.wipRoot = {
+			dom: container,
+			props: {
+				children: [element],
+			},
+			alternate: appState.currentRoot,
+		};
+		appState.deletions = [];
 
-	// ここで appState.nextUnitOfWork が null でなくなることで、
-	// workLoop が実行されるようになる
-	appState.nextUnitOfWork = appState.wipRoot;
+		// ここで appState.nextUnitOfWork が null でなくなることで、
+		// workLoop が実行されるようになる
+		appState.nextUnitOfWork = appState.wipRoot;
+	};
 }
 
-export { createElement, render };
+function createRoot(container: DomNode) {
+	return {
+		render: render(container),
+	};
+}
+
+export { createElement, createRoot };
