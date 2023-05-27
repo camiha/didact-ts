@@ -43,7 +43,7 @@ function App() {
 
 	return (
 		<div>
-			<p>Count: {count}</p>
+			<p style={{ color: "blue" }}>Count: {count}</p>
 			<button type="button" onClick={handleCountUp}>
 				count up
 			</button>

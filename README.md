@@ -73,8 +73,14 @@ const container = document.getElementById("root") as HTMLElement;
 Didact.render(element, container);
 ```
 
+## Styling
+style object supported
+
+```tsx
+<p style={{ color: "blue" }}>Count: {count}</p>
+```
+
 ## TODO
-- [ ] support style object
 - [ ] add memo hooks
 
 ## thanks

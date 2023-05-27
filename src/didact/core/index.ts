@@ -2,6 +2,14 @@ import type { RequestIdleCallbackDeadline, DomNode, Fiber } from "./types";
 import { appState } from "./state";
 import { isEvent, isGone, isNew, isProperty } from "../util";
 
+function styleObjectToString(style: any) {
+	return Object.keys(style).reduce(
+		(acc, key) =>
+			`${acc}${key.split(/(?=[A-Z])/).join("-").toLowerCase()}:${style[key]};`,
+		"",
+	);
+}
+
 function createElement(type: string, props: any, ...children: any[]) {
 	return {
 		type,
@@ -38,7 +46,11 @@ function updateDom(dom: DomNode, prevProps: any, nextProps: any) {
 		.filter(isProperty)
 		.filter(isNew(prevProps, nextProps))
 		.forEach((name) => {
-			(dom as any)[name] = nextProps[name];
+			if (name === "style") {
+				(dom as any)[name] = styleObjectToString(nextProps[name]);
+			} else {
+				(dom as any)[name] = nextProps[name];
+			}
 		});
 
 	// Remove old or changed event listeners
