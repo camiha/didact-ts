@@ -1,32 +1,9 @@
-type RequestIdleCallbackDeadline = {
-	readonly didTimeout: boolean;
-	timeRemaining: () => number;
-};
-
-type DomNode = HTMLElement | Text;
-type Fiber = {
-	type?: string | Function;
-	props: {
-		children: Fiber[];
-		[key: string]: any;
-	};
-	dom?: DomNode | null;
-	parent?: Fiber | null;
-	sibling?: Fiber | null;
-	child?: Fiber | null;
-	alternate?: Fiber | null;
-	effectTag?: string;
-	hooks?: any[];
-};
-
-type AppState = {
-	currentRoot: Fiber;
-	deletions: Fiber[];
-	wipFiber: Fiber;
-	nextUnitOfWork?: Fiber;
-	wipRoot?: Fiber | null;
-	hookIndex: number;
-};
+import type {
+	RequestIdleCallbackDeadline,
+	DomNode,
+	Fiber,
+	AppState,
+} from "./types";
 
 const appState = {} as AppState;
 
