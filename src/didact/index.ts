@@ -32,13 +32,13 @@ function createTextElement(text: string) {
 const isEvent = (key: any) => key.startsWith("on");
 const isProperty = (key: any) => key !== "children";
 const isNew = (prev: any, next: any) => (key: any) => prev[key] !== next[key];
-const isGone = (prev: any, next: any) => (key: any) => !(key in next);
+const isGone = (next: any) => (key: any) => !(key in next);
 
 function updateDom(dom: DomNode, prevProps: any, nextProps: any) {
 	// Remove old properties
 	Object.keys(prevProps)
 		.filter(isProperty)
-		.filter(isGone(prevProps, nextProps))
+		.filter(isGone(nextProps))
 		.forEach((name) => {
 			(dom as any)[name] = "";
 		});
