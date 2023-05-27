@@ -1,10 +1,6 @@
 import type { RequestIdleCallbackDeadline, DomNode, Fiber } from "./types";
 import { appState } from "./state";
-
-const isEvent = (key: any) => key.startsWith("on");
-const isProperty = (key: any) => key !== "children";
-const isNew = (prev: any, next: any) => (key: any) => prev[key] !== next[key];
-const isGone = (next: any) => (key: any) => !(key in next);
+import { isEvent, isGone, isNew, isProperty } from "../util";
 
 function createElement(type: string, props: any, ...children: any[]) {
 	return {
@@ -45,7 +41,7 @@ function updateDom(dom: DomNode, prevProps: any, nextProps: any) {
 			(dom as any)[name] = nextProps[name];
 		});
 
-	//　Remove old or changed event listeners
+	// Remove old or changed event listeners
 	Object.keys(prevProps)
 		.filter(isEvent)
 		.filter((key) => !(key in nextProps) || isNew(prevProps, nextProps)(key))
