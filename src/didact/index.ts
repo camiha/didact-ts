@@ -94,7 +94,7 @@ function updateDom(dom: DomNode, prevProps: any, nextProps: any) {
 }
 
 function commitRoot() {
-	// appState.deletions.forEach(commitWork);
+	appState.deletions.forEach(commitWork);
 
 	if (appState.wipRoot?.child) {
 		commitWork(appState.wipRoot.child);
