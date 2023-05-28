@@ -15,7 +15,12 @@ export function useState<T>(
 	});
 
 	const setState = (action: any) => {
-		hook.queue.push(action);
+		if (typeof action === "function") {
+			hook.queue.push(action);
+		} else {
+			hook.queue.push(() => action);
+		}
+
 		appState.wipRoot = {
 			dom: appState.currentRoot.dom,
 			props: appState.currentRoot.props,
