@@ -10,12 +10,26 @@ function styleObjectToString(style: any) {
 	);
 }
 
+function toChildArray(children: any, out: any[] = []) {
+	if (children == null || typeof children === "boolean") return out;
+	if (Array.isArray(children)) {
+		children.some((child) => {
+			toChildArray(child, out);
+		});
+	} else {
+		out.push(children);
+	}
+	return out;
+}
+
 function createElement(type: string, props: any, ...children: any[]) {
+	const childArray = toChildArray(children, []);
+
 	return {
 		type,
 		props: {
 			...props,
-			children: children.map((child) =>
+			children: childArray.map((child) =>
 				typeof child === "object" ? child : createTextElement(child),
 			),
 		},
